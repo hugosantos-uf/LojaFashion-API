@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class CategoriaService {
 
     private final CategoriaRepository categoriaRepository;
-    private final ProdutoRepository produtoRepository; // Usado para validação na exclusão
+    private final ProdutoRepository produtoRepository;
     private final ObjectMapper objectMapper;
 
     public CategoriaDTO create(CategoriaCreateDTO categoriaCreateDTO) throws RegraDeNegocioException {
