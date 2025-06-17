@@ -33,7 +33,7 @@ public class SecurityConfiguration {
                 .cors().and()
                 .csrf().disable()
                 .authorizeHttpRequests((authz) -> authz
-                        .antMatchers("/auth", "/cliente").permitAll() // Permitir cadastro de cliente
+                        .antMatchers("/", "/auth", "/cliente", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .antMatchers(HttpMethod.POST, "/usuario").hasRole(ADMIN)
                         .antMatchers(HttpMethod.GET, "/usuario/logado").authenticated()
                         .antMatchers(HttpMethod.PUT, "/usuario/trocar-senha").authenticated()
