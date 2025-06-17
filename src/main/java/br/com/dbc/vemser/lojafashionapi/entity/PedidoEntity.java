@@ -16,8 +16,7 @@ import java.util.Set;
 public class PedidoEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PEDIDO_GENERATOR")
-    @SequenceGenerator(name = "SEQ_PEDIDO_GENERATOR", sequenceName = "SEQ_PEDIDO", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_PEDIDO")
     private Integer idPedido;
 

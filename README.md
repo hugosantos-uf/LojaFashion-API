@@ -1,86 +1,105 @@
 # LojaFashionAPI
 
-Este projeto foi desenvolvido como uma API backend para uma loja de moda online. Ele implementa operações CRUD completas para as principais entidades de um e-commerce de moda, segue o padrão MVC (Controller-Service-Repository) e utiliza **Spring Data JPA** para persistência de dados em um banco Oracle.
-
-## Principais Mudanças e Novas Funcionalidades (Versão Atual)
-
-Esta versão representa uma evolução significativa em relação à original, com foco em maior robustez, funcionalidades avançadas e melhores práticas de desenvolvimento. As principais melhorias são:
-
-* **Migração para Spring Data JPA:** A camada de persistência foi completamente refatorada, saindo de JDBC para Spring Data JPA. Isso simplifica o código de acesso a dados, elimina a necessidade de SQL manual para operações CRUD e habilita recursos poderosos como a criação de queries a partir de nomes de métodos.
-
-* **Pedidos com Múltiplos Itens:** O sistema de pedidos foi redesenhado para refletir um e-commerce real. Agora, um único pedido pode conter múltiplos produtos com quantidades variadas, através da nova entidade `ItemPedido`.
-
-* **Paginação em Endpoints:** Os endpoints de listagem de Clientes e Produtos agora são paginados (`/cliente`, `/produto`), permitindo que os consumidores da API controlem a quantidade de dados recebida por requisição, melhorando a performance e a escalabilidade.
-
-* **Módulo de Relatórios com JPQL:** Foi adicionado um novo controller (`/relatorio`) que expõe relatórios complexos gerados com JPQL (Java Persistence Query Language). Isso inclui relatórios com múltiplos `JOINs` e agregações (`GROUP BY`, `SUM`), demonstrando uma capacidade analítica mais avançada.
-
-## Tecnologias Utilizadas
-
-* **Java 17**
-* **Spring Boot 2.7.6**
-  * Spring Web (para APIs REST)
-  * **Spring Data JPA** (para acesso ao banco de dados)
-  * Spring Validation (para validação de DTOs)
-  * Spring Boot Starter Mail (para envio de e-mails)
-* **Maven** (Gerenciador de dependências e build)
-* **Oracle Database** (Banco de dados relacional, usando o driver `ojdbc11`)
-* **Lombok** (Para reduzir código boilerplate)
-* **SpringDoc OpenAPI UI (Swagger)** (Para documentação interativa da API, versão 1.6.8)
-* **FreeMarker** (Para templates de e-mail)
+API backend para uma loja de moda online, desenvolvida com Spring Boot. O projeto implementa um sistema de e-commerce completo, com gerenciamento de produtos, clientes e pedidos, protegido por um robusto sistema de controle de acesso baseado em cargos (RBAC) com autenticação via Token JWT.
 
 ## Funcionalidades Principais
 
-* Gerenciamento completo (CRUD) de **Categorias** de produtos.
-* Gerenciamento completo (CRUD) e **paginado** de **Produtos**, associados a categorias.
-* Gerenciamento completo (CRUD) e **paginado** de **Clientes**.
-  * Envio de e-mail de boas-vindas no cadastro de novos clientes.
-* Gerenciamento de **Pedidos**, com suporte a **múltiplos produtos por pedido**.
-  * Cálculo automático de valor total.
-  * Atualização de status do pedido.
-  * Envio de e-mail de confirmação de pedido com lista de itens detalhada.
-* Geração de **Relatórios** via endpoints, como:
-  * Listagem de pedidos por cliente.
-  * Ranking de produtos mais vendidos com receita gerada.
-* Validação de dados de entrada em todas as DTOs.
-* Documentação da API com Swagger UI.
+### Gerenciamento da Loja
+- **CRUD de Categorias:** Gerenciamento completo de categorias de produtos.
+- **CRUD de Produtos:** Gestão completa e paginada de produtos, associados a categorias.
+- **CRUD de Clientes:** Gestão completa e paginada de clientes.
+- **Gestão de Pedidos:** Sistema de pedidos que suporta múltiplos itens, com cálculo de valor total, atualização de status e envio de e-mail de confirmação.
+- **Módulo de Relatórios:** Endpoints para gerar relatórios complexos com JPQL, como ranking de produtos mais vendidos e pedidos por cliente.
 
-## Diagrama ER V1
-![img](https://github.com/user-attachments/assets/7c874462-d255-467a-819e-71fe472c79e6)
+### Segurança e Autenticação
+- **Autenticação via Token JWT:** Autenticação stateless utilizando JSON Web Tokens (JWT) para proteger os endpoints.
+- **Criptografia de Senhas com BCrypt:** Todas as senhas de usuários são armazenadas de forma segura no banco de dados utilizando o algoritmo de hashing BCrypt.
+- **Controle de Acesso Baseado em Cargos (RBAC):** Sistema de permissões com 3 níveis de acesso: `ROLE_ADMIN`, `ROLE_CLIENTE` e `ROLE_MARKETING`.
+- **Gerenciamento de Usuários:**
+  - Cadastro público de clientes com atribuição automática do cargo `ROLE_CLIENTE`.
+  - Endpoint exclusivo para `ROLE_ADMIN` criar novos usuários com cargos específicos.
+  - Troca de senha segura, com validação da senha atual.
+  - Endpoint para desativação de contas de usuário (restrito ao `ROLE_ADMIN`).
 
-## Diagrama ER V2
-![image](https://github.com/user-attachments/assets/36b82b69-7d00-4345-a057-64c5742a2780)
+## Diagrama de Permissionamento de Acesso
 
-## Pré-requisitos
+A tabela abaixo detalha as permissões para cada recurso da API, com base nos cargos definidos.
 
+| Recurso | Método HTTP | ROLE_ADMIN | ROLE_CLIENTE | ROLE_MARKETING | Público (Sem Login) |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **/auth** | `POST` | ✔️ | ✔️ | ✔️ | ✔️ |
+| **/cliente** | `POST` | ✔️ | ✔️ | ✔️ | ✔️ |
+| | | | | | |
+| **/produto** | `POST` | ✔️ | ❌ | ✔️ | ❌ |
+| **/produto/{id}**| `PUT` | ✔️ | ❌ | ✔️ | ❌ |
+| **/produto/{id}**| `DELETE` | ✔️ | ❌ | ✔️ | ❌ |
+| **/produto/** | `GET` | ✔️ | ✔️ | ✔️ | ✔️ |
+| | | | | | |
+| **/categoria** | `POST` | ✔️ | ❌ | ✔️ | ❌ |
+| **/categoria/{id}**| `PUT` | ✔️ | ❌ | ✔️ | ❌ |
+| **/categoria/{id}**| `DELETE` | ✔️ | ❌ | ✔️ | ❌ |
+| **/categoria/** | `GET` | ✔️ | ✔️ | ✔️ | ✔️ |
+| | | | | | |
+| **/pedido** | `POST` | ❌ | ✔️ | ❌ | ❌ |
+| **/pedido/{id}/status**|`PUT` | ✔️ | ❌ | ❌ | ❌ |
+| **/pedido/{id}** | `DELETE` | ✔️ | ❌ | ❌ | ❌ |
+| **/pedido/por-cliente/{id}**| `GET` | ✔️ | ✔️ | ❌ | ❌ |
+| **/pedido/{id}** | `GET` | ✔️ | ❌ | ❌ | ❌ |
+| | | | | | |
+| **/relatorio/** | `GET` | ✔️ | ❌ | ❌ | ❌ |
+| | | | | | |
+| **/usuario** | `POST` | ✔️ | ❌ | ❌ | ❌ |
+| **/usuario/{id}** | `DELETE` | ✔️ | ❌ | ❌ | ❌ |
+| **/usuario/logado** | `GET` | ✔️ | ✔️ | ✔️ | ❌ |
+| **/usuario/trocar-senha**|`PUT` | ✔️ | ✔️ | ✔️ | ❌ |
+
+## Tecnologias Utilizadas
+* **Java 17**
+* **Spring Boot 2.7.6**
+  * Spring Web
+  * Spring Data JPA
+  * Spring Security
+  * Spring Validation
+  * Spring Boot Starter Mail
+* **Maven**
+* **Oracle Database** (Driver `ojdbc11`)
+* **Lombok**
+* **JJwt** (para tokens JWT)
+* **SpringDoc OpenAPI UI (Swagger)** (para documentação interativa da API)
+* **FreeMarker** (para templates de e-mail)
+
+## Como Executar
+
+### Pré-requisitos
 * JDK 17 ou superior.
 * Maven 3.6 ou superior.
 * Uma instância do Oracle Database em execução.
-* Um cliente SQL (como DBeaver, SQL Developer) para executar o script inicial do banco.
+* Um cliente SQL (DBeaver, SQL Developer, etc.).
+
+### Passos
+1.  **Clone o repositório:**
+    ```bash
+    git clone <url-do-seu-repositorio>
+    cd LojaFashion-API
+    ```
+2.  **Configure o Banco de Dados:**
+  * Abra o arquivo `src/main/resources/application.properties`.
+  * Altere as propriedades `spring.datasource.url`, `spring.datasource.username` e `spring.datasource.password` com os dados da sua instância Oracle.
+  * Ajuste as configurações de e-mail (`spring.mail.*`) se desejar testar o envio.
+3.  **Crie a Estrutura do Banco:**
+  * Execute o script `bd/createandinsert.sql` no seu cliente SQL para criar todas as tabelas, sequences e cargos iniciais.
+4.  **Execute a Aplicação:**
+    ```bash
+    mvn spring-boot:run
+    ```
+5.  **Acesse a Documentação:**
+  * Após a inicialização, acesse a documentação interativa da API (Swagger UI) no seu navegador: `http://localhost:8080/`
 
 ## Endpoints Principais
-
-* `/categoria` - Gerenciamento de Categorias
-* `/produto` - Gerenciamento de Produtos (com paginação)
-* `/cliente` - Gerenciamento de Clientes (com paginação)
-* `/pedido` - Gerenciamento de Pedidos
-* `/relatorio` - Endpoints para geração de relatórios
-
-Consulte o Swagger UI (`/`) para detalhes completos de cada endpoint.
-
-## Estrutura do Projeto (Simplificada)
-
-O projeto segue uma estrutura padrão de aplicações Spring Boot, organizada em pacotes:
-
-* `br.com.dbc.vemser.lojafashionapi`
-    * `config`: Configurações da aplicação (OpenAPI, Conexão com BD).
-    * `controller`: Controladores REST que expõem a API.
-    * `dto`: Objetos de Transferência de Dados para requisições e respostas.
-    * `entity`: Entidades que mapeiam as tabelas do banco de dados.
-    * `enums`: Enumerações (ex: `StatusPedido`).
-    * `exception`: Classes de exceção customizadas e handler global.
-    * `repository`: Classes responsáveis pelo acesso e manipulação dos dados no banco (JDBC).
-    * `service`: Classes que contêm a lógica de negócio da aplicação.
-    * `LojaFashionApiApplication.java`: Classe principal para iniciar a aplicação.
-* `src/main/resources`
-    * `application.properties`: Arquivo de configuração principal.
-    * `templates/`: Templates FreeMarker para os e-mails.
+* `/auth` - Autenticação e geração de token.
+* `/usuario` - Gerenciamento de usuários e senhas.
+* `/cliente` - Cadastro público de clientes.
+* `/categoria` - Gerenciamento de Categorias.
+* `/produto` - Gerenciamento de Produtos.
+* `/pedido` - Gerenciamento de Pedidos.
+* `/relatorio` - Endpoints para geração de relatórios.

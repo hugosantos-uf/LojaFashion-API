@@ -15,8 +15,7 @@ import java.util.Set;
 @Entity(name = "CLIENTE")
 public class ClienteEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_CLIENTE_GENERATOR")
-    @SequenceGenerator(name = "SEQ_CLIENTE_GENERATOR", sequenceName = "SEQ_CLIENTE", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_CLIENTE")
     private Integer idCliente;
 
@@ -35,10 +34,11 @@ public class ClienteEntity {
     @Column(name = "TELEFONE")
     private String telefone;
 
-    @Column(name = "SENHA")
-    private String senha;
-
     @JsonIgnore
     @OneToMany(mappedBy = "cliente")
     private Set<PedidoEntity> pedidos;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "ID_USUARIO", referencedColumnName = "ID_USUARIO")
+    private Usuario usuario;
 }

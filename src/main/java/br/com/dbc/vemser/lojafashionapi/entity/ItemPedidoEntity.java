@@ -13,8 +13,7 @@ import java.math.BigDecimal;
 public class ItemPedidoEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_ITEM_PEDIDO_GENERATOR")
-    @SequenceGenerator(name = "SEQ_ITEM_PEDIDO_GENERATOR", sequenceName = "SEQ_ITEM_PEDIDO", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_ITEM_PEDIDO")
     private Integer idItemPedido;
 
